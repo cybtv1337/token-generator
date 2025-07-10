@@ -2,8 +2,12 @@ const express = require("express");
 const puppeteer = require("puppeteer");
 const app = express();
 
+// Set port from Fly.io environment
+const PORT = process.env.PORT || 8080;
+
+// Create route
 app.get("/generate-token", async (req, res) => {
-  console.log("🔍 /generate-token route triggered");
+  console.log("🔍 Route /generate-token triggered");
 
   let bearerToken = null;
 
@@ -14,6 +18,8 @@ app.get("/generate-token", async (req, res) => {
     });
 
     const page = await browser.newPage();
+
+    // Enable CDP session
     const client = await page.target().createCDPSession();
     await client.send("Network.enable");
 
@@ -21,26 +27,28 @@ app.get("/generate-token", async (req, res) => {
       const headers = params.request.headers;
       if (headers["Authorization"] && !bearerToken) {
         bearerToken = headers["Authorization"];
-        console.log("🎯 Token found in header:", bearerToken);
+        console.log("🎯 Bearer token found:", bearerToken);
       }
     });
 
+    // Visit target page
     await page.goto("https://tvmalaysia.live/channel/ria", { waitUntil: "networkidle2" });
-    await page.waitForTimeout(5000); // Short delay to allow requests
+    await page.waitForTimeout(5000); // Let requests flow
 
     await browser.close();
 
+    // Respond with token or message
     res.json({
-      token: bearerToken ? bearerToken : "⚠️ Token tak dijumpai dalam request header."
+      token: bearerToken ? bearerToken : "⚠️ Token tidak dijumpai dalam request header."
     });
 
   } catch (err) {
-    console.error("❌ Sniper CDP Error:", err.message);
-    res.status(500).json({ error: "❌ CDP intercept gagal: " + err.message });
+    console.error("❌ Error during token intercept:", err.message);
+    res.status(500).json({ error: "❌ Sniper gagal: " + err.message });
   }
 });
 
-const PORT = process.env.PORT || 8080;
-app.listen(PORT, () => {
-  console.log("🚀 Sniper CDP server ready on port", PORT);
+// Start server on 0.0.0.0 for Fly.io
+app.listen(PORT, "0.0.0.0", () => {
+  console.log(`🚀 Sniper server listening on 0.0.0.0:${PORT}`);
 });
