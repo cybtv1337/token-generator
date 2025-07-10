@@ -1,0 +1,5 @@
+app = "token-generator-stream"
+primary_region = "sin"
+
+[env]
+PORT = "8080"
