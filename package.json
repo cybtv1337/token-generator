@@ -1,0 +1,15 @@
+{
+  "name": "token-sniper",
+  "version": "1.0.0",
+  "description": "TVMalaysia bearer token extractor with Puppeteer",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "puppeteer": "^22.8.2"
+  },
+  "author": "CYBERNETIC88",
+  "license": "MIT"
+}
